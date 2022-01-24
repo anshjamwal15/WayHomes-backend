@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -45,8 +46,13 @@ public class PropertyService {
 
             PropertyImages images = new PropertyImages();
 
+            String destination = "F:/images/" + file.getOriginalFilename();
+
+            File fileP = new File(destination);
+
             try {
                 images.setData(file.getBytes());
+                file.transferTo(fileP);
             } catch (IOException e) {
                 e.printStackTrace();
             }
