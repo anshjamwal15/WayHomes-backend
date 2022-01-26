@@ -7,6 +7,8 @@ public class PropertyImagesDto {
 
     private byte[] data;
 
+    private String path;
+
     private String contentType;
 
     private String name;

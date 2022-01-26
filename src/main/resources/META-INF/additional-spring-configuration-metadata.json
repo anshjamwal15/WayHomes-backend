@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "spring.datasource.auto-commit",
+      "type": "java.lang.String",
+      "description": "Description for spring.datasource.auto-commit."
+  }
+] }

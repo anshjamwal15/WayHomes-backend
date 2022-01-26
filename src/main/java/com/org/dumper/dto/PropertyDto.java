@@ -7,19 +7,19 @@ import java.util.Set;
 @Data
 public class PropertyDto {
 
-    private Long sqFeet;
+    public Long sqFeet;
 
-    private Long bedrooms;
+    public Long bedrooms;
 
-    private Long bathrooms;
+    public Long bathrooms;
 
-    private Long garages;
+    public Long garages;
 
-    private Long price;
+    public Long price;
 
-    private String description;
+    public String description;
 
     private Set<PropertyImagesDto> propertyImages;
 
-    private Set<UserDto> isFavourite;
+    public Set<UserDto> isFavourite;
 }

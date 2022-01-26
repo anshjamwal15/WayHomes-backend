@@ -11,12 +11,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
 @Service
 @AllArgsConstructor
@@ -42,8 +42,7 @@ public class PropertyService {
 
         propertyRepository.save(newProperty);
 
-        Arrays.asList(files).stream().forEach(file -> {
-
+        for (MultipartFile file : files) {
             PropertyImages images = new PropertyImages();
 
             String destination = "F:/images/" + file.getOriginalFilename();
@@ -59,28 +58,31 @@ public class PropertyService {
             images.setContentType(file.getContentType());
             images.setName(file.getName());
             images.setSize(file.getSize());
+            images.setPath(destination);
             images.setProperty(newProperty);
             propertyImagesRepository.save(images);
 
-        });
+        }
 
         return "Property created Successfully";
 
     }
 
-    public Page<Property> getAllProperty() {
+    public Page<PropertyDto> getAllProperty() {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        return propertyRepository.findAll(pageable);
+        Page<PropertyDto> property = propertyRepository.findAll(pageable).map(propertyMapper::toDto);
+
+        return property;
     }
 
     public PropertyDto getPropertyById(Long propertyId) {
 
         Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId ));
+                .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
 
-        return propertyMapper.toEntity(property);
+        return propertyMapper.toDto(property);
 
     }
 

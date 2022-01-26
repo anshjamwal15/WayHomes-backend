@@ -2,6 +2,7 @@ package com.org.dumper.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 
@@ -14,7 +15,11 @@ public class PropertyImages extends BaseModel {
     @GeneratedValue
     private Long id;
 
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
     private byte[] data;
+
+    private String path;
 
     private String contentType;
 

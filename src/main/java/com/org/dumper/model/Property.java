@@ -26,10 +26,10 @@ public class Property extends BaseModel {
 
     private Long price;
 
-    @Column(name="description", length=512)
+    @Column(name = "description", length = 512)
     private String description;
 
-    @Column(name="address", length=512)
+    @Column(name = "address", length = 512)
     private String address;
 
     @OneToMany(mappedBy = "property")

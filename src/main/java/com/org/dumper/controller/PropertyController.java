@@ -1,12 +1,10 @@
 package com.org.dumper.controller;
 
 import com.org.dumper.dto.PropertyDto;
-import com.org.dumper.model.Property;
 import com.org.dumper.payload.request.PropertyRequest;
 import com.org.dumper.service.PropertyService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,15 +30,15 @@ public class PropertyController {
     }
 
     @GetMapping("/all")
-    public Page<Property> getAllProperty() {
+    public Page<PropertyDto> getAllProperty() {
         return propertyService.getAllProperty();
     }
 
-    @GetMapping(value = "/{propertyId}", produces = MediaType.IMAGE_JPEG_VALUE)
+    @GetMapping(value = "/{propertyId}")
     public ResponseEntity<PropertyDto> getPropertyById(@PathVariable Long propertyId) {
 
-        PropertyDto propertyDto = propertyService.getPropertyById(propertyId);
+        PropertyDto property = propertyService.getPropertyById(propertyId);
 
-        return ResponseEntity.ok(propertyDto);
+        return ResponseEntity.ok(property);
     }
 }
