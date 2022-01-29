@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class PropertyImagesDto {
 
-    private byte[] data;
+//    private byte[] data;
 
     private String path;
 

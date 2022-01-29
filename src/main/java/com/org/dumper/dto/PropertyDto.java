@@ -7,6 +7,8 @@ import java.util.Set;
 @Data
 public class PropertyDto {
 
+    private Long id;
+
     public Long sqFeet;
 
     public Long bedrooms;
@@ -18,6 +20,8 @@ public class PropertyDto {
     public Long price;
 
     public String description;
+
+    public String address;
 
     private Set<PropertyImagesDto> propertyImages;
 

@@ -29,6 +29,15 @@ public class PropertyController {
         return ResponseEntity.ok().body("Property created SuccessFully");
     }
 
+    @PostMapping("/add-image/{propertyId}")
+    public ResponseEntity<String> addImage(
+            @RequestParam MultipartFile[] files, @PathVariable Long propertyId
+    ) {
+        propertyService.addPropertyImage(propertyId, files);
+
+        return ResponseEntity.ok("Image added Successfully");
+    }
+
     @GetMapping("/all")
     public Page<PropertyDto> getAllProperty() {
         return propertyService.getAllProperty();
@@ -41,4 +50,11 @@ public class PropertyController {
 
         return ResponseEntity.ok(property);
     }
+
+    @DeleteMapping("/{propertyId}")
+    public ResponseEntity<String> deleteById(@PathVariable Long propertyId) {
+        String success = propertyService.deleteById(propertyId);
+        return ResponseEntity.ok(success);
+    }
+
 }

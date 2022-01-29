@@ -4,6 +4,7 @@ import com.org.dumper.dto.PropertyDto;
 import com.org.dumper.mapper.PropertyMapper;
 import com.org.dumper.model.Property;
 import com.org.dumper.model.PropertyImages;
+import com.org.dumper.payload.request.PropertyImagesRequest;
 import com.org.dumper.payload.request.PropertyRequest;
 import com.org.dumper.repository.PropertyImagesRepository;
 import com.org.dumper.repository.PropertyRepository;
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -45,7 +47,7 @@ public class PropertyService {
         for (MultipartFile file : files) {
             PropertyImages images = new PropertyImages();
 
-            String destination = "F:/images/" + file.getOriginalFilename();
+            String destination = "F:/Practice-dump/Dumper/assets/images/" + file.getOriginalFilename();
 
             File fileP = new File(destination);
 
@@ -68,6 +70,36 @@ public class PropertyService {
 
     }
 
+
+    public String addPropertyImage(Long propertyId,MultipartFile[] request) {
+
+        propertyRepository.findById(propertyId)
+                .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
+
+        for (MultipartFile file : request) {
+            PropertyImages images = new PropertyImages();
+
+            String destination = "F:/Practice-dump/Dumper/assets/images/" + file.getOriginalFilename();
+
+            File fileP = new File(destination);
+
+            try {
+                images.setData(file.getBytes());
+                file.transferTo(fileP);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            images.setContentType(file.getContentType());
+            images.setName(file.getName());
+            images.setSize(file.getSize());
+            images.setPath(destination);
+            propertyImagesRepository.save(images);
+
+        }
+
+        return "Image added Successfully";
+    }
+
     public Page<PropertyDto> getAllProperty() {
 
         Pageable pageable = PageRequest.of(0, 10);
@@ -84,6 +116,13 @@ public class PropertyService {
 
         return propertyMapper.toDto(property);
 
+    }
+
+    public String deleteById(Long propertyId) {
+
+        propertyImagesRepository.deleteById(propertyId);
+
+        return "Property successfully deleted with id: " + propertyId;
     }
 
 
