@@ -19,7 +19,7 @@ public interface FavPropertiesMapper {
 
     FavPropertiesDto toDto(FavProperties favProperties);
 
-    @Mapping()
+//    @Mapping()
     PropertyDto toPropertyDto(Property property);
 
     List<FavPropertiesDto> map(List<FavProperties> propertiesList);
