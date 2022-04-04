@@ -6,11 +6,12 @@ import lombok.Data;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import java.io.Serializable;
 import java.time.Instant;
 
 @MappedSuperclass
 @Data
-public abstract class BaseModel {
+public abstract class BaseModel implements Serializable {
 
     @JsonIgnore
     private Instant createdDate;

@@ -37,10 +37,10 @@ public class User extends BaseModel {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(name = "userFavouriteProperties",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "property_id"))
-    private Set<Property> favouriteProperties;
+//    @ManyToMany
+//    @JoinTable(name = "userFavouriteProperties",
+//            joinColumns = @JoinColumn(name = "user_id"),
+//            inverseJoinColumns = @JoinColumn(name = "property_id"))
+//    private Set<Property> favouriteProperties;
 
 }

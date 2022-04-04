@@ -1,11 +1,9 @@
-package com.org.dumper.dto;
+package com.org.dumper.payload.request;
 
 import lombok.Data;
 
-import java.util.Set;
-
 @Data
-public class UserDto {
+public class UserProfileRequest {
 
     private String firstName;
 
@@ -15,6 +13,5 @@ public class UserDto {
 
     private String username;
 
-    private Set<RoleDto> roles;
-
+    private String password;
 }
