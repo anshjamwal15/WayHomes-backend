@@ -23,7 +23,9 @@ public class PropertyDto {
 
     public String address;
 
-//    private Set<PropertyImagesDto> propertyImages;
+    public UserDto userDto;
+
+    private Set<PropertyImagesDto> propertyImages;
 
     public Set<UserDto> isFavourite;
 }
