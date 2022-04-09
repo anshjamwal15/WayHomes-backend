@@ -32,6 +32,9 @@ public class Property extends BaseModel {
     @Column(name = "address", length = 512)
     private String address;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    private User user;
+
     @OneToMany(mappedBy = "property")
     private Set<PropertyImages> propertyImages;
 

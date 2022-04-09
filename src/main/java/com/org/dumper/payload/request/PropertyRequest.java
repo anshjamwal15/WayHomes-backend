@@ -25,4 +25,7 @@ public class PropertyRequest {
     @NotBlank
     private String address;
 
+    @NotBlank
+    private Long userId;
+
 }
