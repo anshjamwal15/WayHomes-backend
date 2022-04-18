@@ -12,6 +12,7 @@ import com.org.dumper.repository.FavRepository;
 import com.org.dumper.repository.PropertyRepository;
 import com.org.dumper.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +29,8 @@ public class UserService {
     private final FavRepository favRepository;
 
     private final UserMapper userMapper;
+
+    private final ModelMapper mapper;
 
     private final FavPropertiesMapper favPropertiesMapper;
 
@@ -71,7 +74,7 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id :" + userId));
 
-        return userMapper.toDto(user);
+        return mapper.map(user, UserDto.class);
     }
 
     public UserDto updateUserProfile(UserProfileRequest request, Long userId) {
@@ -87,7 +90,7 @@ public class UserService {
 
         userRepository.save(user);
 
-        return userMapper.toDto(user);
+        return mapper.map(user, UserDto.class);
 
     }
 }

@@ -2,14 +2,16 @@ package com.org.dumper.service;
 
 import com.org.dumper.dto.PropertyDto;
 import com.org.dumper.mapper.PropertyMapper;
-import com.org.dumper.model.*;
+import com.org.dumper.model.Property;
+import com.org.dumper.model.PropertyImages;
+import com.org.dumper.model.User;
 import com.org.dumper.payload.request.PropertyRequest;
 import com.org.dumper.repository.PropertyImagesRepository;
 import com.org.dumper.repository.PropertyRepository;
-import com.org.dumper.repository.RoleRepository;
 import com.org.dumper.repository.UserRepository;
+import com.org.dumper.utils.ObjectMapperUtils;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,8 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -34,7 +35,7 @@ public class PropertyService {
 
     private final UserRepository userRepository;
 
-    private final PropertyMapper propertyMapper;
+    private final ModelMapper mapper;
 
     private final Path root = Paths.get("uploads");
 
@@ -51,7 +52,7 @@ public class PropertyService {
         newProperty.setAddress(request.getAddress());
 
         User user = userRepository.findById(request.getUserId())
-                        .orElseThrow(() -> new ResourceAccessException("User not found with id: "+ request.getUserId()));
+                .orElseThrow(() -> new ResourceAccessException("User not found with id: " + request.getUserId()));
 
         // TODO Check user as buyer or seller
 //        if (user.getRoles() == )
@@ -76,7 +77,7 @@ public class PropertyService {
             images.setContentType(file.getContentType());
             images.setName(file.getName());
             images.setSize(file.getSize());
-            String path = root.toString()+ "/" + file.getOriginalFilename();
+            String path = root + "/" + file.getOriginalFilename();
             images.setPath(path);
             images.setProperty(newProperty);
             propertyImagesRepository.save(images);
@@ -117,13 +118,15 @@ public class PropertyService {
         return "Image added Successfully";
     }
 
-    public Page<PropertyDto> getAllProperty() {
+    public List<PropertyDto> getAllProperty() {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        Page<PropertyDto> property = propertyRepository.findAll(pageable).map(propertyMapper::toDto);
+//        Page<PropertyDto> property = propertyRepository.findAll(pageable).map(propertyMapper::toDto);
 
-        return property;
+        List<Property> propertyList = propertyRepository.findAll();
+
+        return ObjectMapperUtils.mapAll(propertyList, PropertyDto.class);
     }
 
     public PropertyDto getPropertyById(Long propertyId) {
@@ -131,7 +134,7 @@ public class PropertyService {
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
 
-        return propertyMapper.toDto(property);
+        return mapper.map(property, PropertyDto.class);
 
     }
 
