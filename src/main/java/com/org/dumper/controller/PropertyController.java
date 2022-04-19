@@ -41,7 +41,7 @@ public class PropertyController {
     }
 
     @GetMapping("/all")
-    public List<PropertyDto> getAllProperty() {
+    public Page<PropertyDto> getAllProperty() {
         return propertyService.getAllProperty();
     }
 

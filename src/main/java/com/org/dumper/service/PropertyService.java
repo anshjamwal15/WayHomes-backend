@@ -1,7 +1,6 @@
 package com.org.dumper.service;
 
 import com.org.dumper.dto.PropertyDto;
-import com.org.dumper.mapper.PropertyMapper;
 import com.org.dumper.model.Property;
 import com.org.dumper.model.PropertyImages;
 import com.org.dumper.model.User;
@@ -12,6 +11,7 @@ import com.org.dumper.repository.UserRepository;
 import com.org.dumper.utils.ObjectMapperUtils;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -118,15 +118,13 @@ public class PropertyService {
         return "Image added Successfully";
     }
 
-    public List<PropertyDto> getAllProperty() {
+    public Page<PropertyDto> getAllProperty() {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-//        Page<PropertyDto> property = propertyRepository.findAll(pageable).map(propertyMapper::toDto);
+        Page<Property> property = propertyRepository.findAll(pageable);
 
-        List<Property> propertyList = propertyRepository.findAll();
-
-        return ObjectMapperUtils.mapAll(propertyList, PropertyDto.class);
+        return ObjectMapperUtils.mapPage(property, PropertyDto.class);
     }
 
     public PropertyDto getPropertyById(Long propertyId) {

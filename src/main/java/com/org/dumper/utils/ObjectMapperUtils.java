@@ -57,11 +57,9 @@ public class ObjectMapperUtils {
     }
 
     /** Page Mapper **/
-//    public static  <D, T> Page<D> mapPage(final Page<T> entityPage, Class<D> outClass) {
-//        return entityPage.stream()
-//                .map(entity -> map(entity, outClass))
-//                .collect(Collectors.to);
-//    }
+    public static  <D, T> Page<D> mapPage(final Page<T> entityPage, Class<D> outClass) {
+        return entityPage.map(t -> modelMapper.map(entityPage, outClass));
+    }
 
     /**
      * Maps {@code source} to {@code destination}.

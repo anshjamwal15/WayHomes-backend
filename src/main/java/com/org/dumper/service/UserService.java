@@ -2,8 +2,6 @@ package com.org.dumper.service;
 
 import com.org.dumper.dto.FavPropertiesDto;
 import com.org.dumper.dto.UserDto;
-import com.org.dumper.mapper.FavPropertiesMapper;
-import com.org.dumper.mapper.UserMapper;
 import com.org.dumper.model.FavProperties;
 import com.org.dumper.model.Property;
 import com.org.dumper.model.User;
@@ -11,6 +9,7 @@ import com.org.dumper.payload.request.UserProfileRequest;
 import com.org.dumper.repository.FavRepository;
 import com.org.dumper.repository.PropertyRepository;
 import com.org.dumper.repository.UserRepository;
+import com.org.dumper.utils.ObjectMapperUtils;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -27,12 +26,6 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final FavRepository favRepository;
-
-    private final UserMapper userMapper;
-
-    private final ModelMapper mapper;
-
-    private final FavPropertiesMapper favPropertiesMapper;
 
     public String addFavProperty(Long userId, Long propertyId, boolean isFav) {
 
@@ -65,7 +58,7 @@ public class UserService {
 
         List<FavProperties> propertiesList = favRepository.findAllByUsersId(userId);
 
-        return favPropertiesMapper.map(propertiesList);
+        return ObjectMapperUtils.mapAll(propertiesList, FavPropertiesDto.class);
 
     }
 
@@ -74,7 +67,7 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id :" + userId));
 
-        return mapper.map(user, UserDto.class);
+        return ObjectMapperUtils.map(user, UserDto.class);
     }
 
     public UserDto updateUserProfile(UserProfileRequest request, Long userId) {
@@ -90,7 +83,7 @@ public class UserService {
 
         userRepository.save(user);
 
-        return mapper.map(user, UserDto.class);
+        return ObjectMapperUtils.map(user, UserDto.class);
 
     }
 }
