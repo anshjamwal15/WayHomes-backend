@@ -1,5 +1,6 @@
 package com.org.dumper.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,6 +34,7 @@ public class Property extends BaseModel {
     private String address;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "property")

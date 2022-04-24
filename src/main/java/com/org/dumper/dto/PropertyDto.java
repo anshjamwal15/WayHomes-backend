@@ -23,7 +23,7 @@ public class PropertyDto {
 
     public String address;
 
-    public UserDto userDto;
+    public UserDto user;
 
     private Set<PropertyImagesDto> propertyImages;
 

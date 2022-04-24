@@ -10,6 +10,7 @@ import com.org.dumper.repository.FavRepository;
 import com.org.dumper.repository.PropertyRepository;
 import com.org.dumper.repository.UserRepository;
 import com.org.dumper.utils.ObjectMapperUtils;
+import com.org.dumper.utils.RegexUtils;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -75,11 +76,18 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id :" + userId));
 
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setEmail(request.getEmail());
-        user.setUsername(request.getUsername());
-        user.setPassword(request.getPassword());
+//        user.setFirstName(request.getFirstName());
+//        user.setLastName(request.getLastName());
+
+        if(RegexUtils.isValidEmail(request.getEmail())){
+            user.setEmail(request.getEmail());
+        }
+        if (RegexUtils.isValidUsername(request.getUsername())) {
+            user.setUsername(request.getUsername());
+        }
+        if (!request.getPassword().isBlank()) {
+            user.setPassword(request.getPassword());
+        }
 
         userRepository.save(user);
 

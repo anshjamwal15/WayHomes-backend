@@ -31,7 +31,7 @@ public class UserController {
 
     @PostMapping("/update-profile/{userId}")
     public ResponseEntity<UserDto> updateUserProfile(
-            UserProfileRequest request, @PathVariable Long userId
+            @RequestBody UserProfileRequest request, @PathVariable Long userId
     ) {
         UserDto userDto = userService.updateUserProfile(request, userId);
 

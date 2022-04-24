@@ -1,6 +1,7 @@
 package com.org.dumper.controller;
 
 import com.org.dumper.dto.PropertyDto;
+import com.org.dumper.model.Property;
 import com.org.dumper.payload.request.PropertyRequest;
 import com.org.dumper.service.PropertyService;
 import lombok.AllArgsConstructor;

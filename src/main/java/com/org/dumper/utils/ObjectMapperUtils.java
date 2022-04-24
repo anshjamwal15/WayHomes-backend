@@ -58,7 +58,7 @@ public class ObjectMapperUtils {
 
     /** Page Mapper **/
     public static  <D, T> Page<D> mapPage(final Page<T> entityPage, Class<D> outClass) {
-        return entityPage.map(t -> modelMapper.map(entityPage, outClass));
+        return entityPage.map(t -> map(entityPage, outClass));
     }
 
     /**

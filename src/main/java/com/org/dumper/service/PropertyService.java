@@ -1,6 +1,7 @@
 package com.org.dumper.service;
 
 import com.org.dumper.dto.PropertyDto;
+import com.org.dumper.mapper.PropertyMapper;
 import com.org.dumper.model.Property;
 import com.org.dumper.model.PropertyImages;
 import com.org.dumper.model.User;
@@ -11,6 +12,7 @@ import com.org.dumper.repository.UserRepository;
 import com.org.dumper.utils.ObjectMapperUtils;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +38,8 @@ public class PropertyService {
     private final UserRepository userRepository;
 
     private final ModelMapper mapper;
+
+    private final PropertyMapper propertyMapper;
 
     private final Path root = Paths.get("uploads");
 
@@ -122,9 +126,7 @@ public class PropertyService {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        Page<Property> property = propertyRepository.findAll(pageable);
-
-        return ObjectMapperUtils.mapPage(property, PropertyDto.class);
+        return propertyRepository.findAll(pageable).map(propertyMapper::toDto);
     }
 
     public PropertyDto getPropertyById(Long propertyId) {
