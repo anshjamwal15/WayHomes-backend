@@ -2,7 +2,6 @@ package com.org.dumper.controller;
 
 import com.org.dumper.dto.FavPropertiesDto;
 import com.org.dumper.dto.UserDto;
-import com.org.dumper.model.FavProperties;
 import com.org.dumper.payload.request.UserProfileRequest;
 import com.org.dumper.service.UserService;
 import lombok.AllArgsConstructor;

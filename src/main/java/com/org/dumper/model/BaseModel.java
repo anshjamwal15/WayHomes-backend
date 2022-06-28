@@ -8,25 +8,26 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Date;
 
 @MappedSuperclass
 @Data
 public abstract class BaseModel implements Serializable {
 
     @JsonIgnore
-    private Instant createdDate;
+    private Date createdDate;
     @JsonIgnore
-    private Instant updatedDate;
+    private Date updatedDate;
 
     @PrePersist
     protected void onCreate() {
-        createdDate = Instant.now();
-        updatedDate = Instant.now();
+        createdDate = new Date();
+        updatedDate = new Date();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedDate = Instant.now();
+        updatedDate = new Date();
     }
 
 
