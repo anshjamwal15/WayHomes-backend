@@ -3,7 +3,6 @@ package com.org.dumper.service;
 import com.org.dumper.dto.PropertyDto;
 import com.org.dumper.dto.PropertyImagesDto;
 import com.org.dumper.dto.UserDto;
-import com.org.dumper.mapper.PropertyMapper;
 import com.org.dumper.model.Property;
 import com.org.dumper.model.PropertyImages;
 import com.org.dumper.model.User;
@@ -11,10 +10,9 @@ import com.org.dumper.payload.request.PropertyRequest;
 import com.org.dumper.repository.PropertyImagesRepository;
 import com.org.dumper.repository.PropertyRepository;
 import com.org.dumper.repository.UserRepository;
-import com.org.dumper.utils.ObjectMapperUtils;
+import com.org.dumper.utils.HelperUtils;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -24,14 +22,9 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
+import static org.apache.http.entity.ContentType.*;
 
 @Service
 @AllArgsConstructor
@@ -45,9 +38,9 @@ public class PropertyService {
 
     private final ModelMapper mapper;
 
-    private final PropertyMapper propertyMapper;
+    private final FileStore fileStore;
 
-    private final Path root = Paths.get("uploads");
+    private final HelperUtils helperUtils;
 
     public String createProperty(MultipartFile[] files, PropertyRequest request) {
 
@@ -72,32 +65,31 @@ public class PropertyService {
         propertyRepository.save(newProperty);
 
         for (MultipartFile file : files) {
-            PropertyImages images = new PropertyImages();
-
-//            String destination = root.resolve(file.getOriginalFilename());
-//
-//            File fileP = new File(destination);
-
-            try {
-                images.setData(file.getBytes());
-                Files.copy(file.getInputStream(), root.resolve(file.getOriginalFilename()));
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (file.isEmpty()) {
+                throw new IllegalStateException("Cannot upload empty file");
             }
-            images.setContentType(file.getContentType());
-            images.setName(file.getName());
-            images.setSize(file.getSize());
-            String path = root + "/" + file.getOriginalFilename();
-            images.setPath(path);
-            images.setProperty(newProperty);
-            propertyImagesRepository.save(images);
 
+            if (!Arrays.asList(IMAGE_PNG.getMimeType(),
+                    IMAGE_BMP.getMimeType(),
+                    IMAGE_GIF.getMimeType(),
+                    IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
+                throw new IllegalStateException("File uploaded is not an image");
+            }
+
+            String path = String.format("%s%s", "dumper-storage", UUID.randomUUID());
+
+            File convertedFile = helperUtils.multipartFileToFile(file);
+            fileStore.upload(convertedFile);
+
+            PropertyImages images = PropertyImages.builder()
+                    .path(path)
+                    .build();
+            propertyImagesRepository.save(images);
         }
 
         return "Property created Successfully";
 
     }
-
 
     public String addPropertyImage(Long propertyId, MultipartFile[] request) {
 
@@ -105,24 +97,27 @@ public class PropertyService {
                 .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
 
         for (MultipartFile file : request) {
-            PropertyImages images = new PropertyImages();
-
-            String destination = "F:/Practice-dump/Dumper/assets/images/" + file.getOriginalFilename();
-
-            File fileP = new File(destination);
-
-            try {
-                images.setData(file.getBytes());
-                file.transferTo(fileP);
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (file.isEmpty()) {
+                throw new IllegalStateException("Cannot upload empty file");
             }
-            images.setContentType(file.getContentType());
-            images.setName(file.getName());
-            images.setSize(file.getSize());
-            images.setPath(destination);
-            propertyImagesRepository.save(images);
 
+            if (!Arrays.asList(IMAGE_PNG.getMimeType(),
+                    IMAGE_BMP.getMimeType(),
+                    IMAGE_GIF.getMimeType(),
+                    IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
+                throw new IllegalStateException("File uploaded is not an image");
+            }
+
+            String path = String.format("%s%s", "dumper-storage", UUID.randomUUID());
+
+            File convertedFile = helperUtils.multipartFileToFile(file);
+            fileStore.upload(convertedFile);
+
+            PropertyImages images = PropertyImages.builder()
+                    .path(path)
+                    .contentType(file.getContentType())
+                    .build();
+            propertyImagesRepository.save(images);
         }
 
         return "Image added Successfully";
@@ -169,8 +164,8 @@ public class PropertyService {
             scopeDto.setPropertyImages(imagesDtoSet);
             propertyDtoList.add(scopeDto);
         }
-        final int start = (int)pageable.getOffset();
-        final int end = Math.min((start  + pageable.getPageSize()), propertyDtoList.size());
+        final int start = (int) pageable.getOffset();
+        final int end = Math.min((start + pageable.getPageSize()), propertyDtoList.size());
 
         return new PageImpl<>(propertyDtoList.subList(start, end), pageable, propertyDtoList.size());
     }

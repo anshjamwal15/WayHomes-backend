@@ -1,7 +1,6 @@
 package com.org.dumper.payload.request;
 
 import lombok.Data;
-import org.springframework.lang.Nullable;
 
 @Data
 public class UserProfileRequest {

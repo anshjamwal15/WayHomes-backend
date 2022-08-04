@@ -12,7 +12,6 @@ import com.org.dumper.repository.UserRepository;
 import com.org.dumper.utils.ObjectMapperUtils;
 import com.org.dumper.utils.RegexUtils;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -79,7 +78,7 @@ public class UserService {
 //        user.setFirstName(request.getFirstName());
 //        user.setLastName(request.getLastName());
 
-        if(RegexUtils.isValidEmail(request.getEmail())){
+        if (RegexUtils.isValidEmail(request.getEmail())) {
             user.setEmail(request.getEmail());
         }
         if (RegexUtils.isValidUsername(request.getUsername())) {

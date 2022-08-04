@@ -20,6 +20,10 @@ repositories {
 }
 
 dependencies {
+	// aws
+	implementation 'com.amazonaws:aws-java-sdk:1.12.275'
+	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.275'
+	//
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-validation:2.6.2'

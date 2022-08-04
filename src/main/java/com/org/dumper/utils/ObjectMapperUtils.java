@@ -56,8 +56,10 @@ public class ObjectMapperUtils {
                 .collect(Collectors.toList());
     }
 
-    /** Page Mapper **/
-    public static  <D, T> Page<D> mapPage(final Page<T> entityPage, Class<D> outClass) {
+    /**
+     * Page Mapper
+     **/
+    public static <D, T> Page<D> mapPage(final Page<T> entityPage, Class<D> outClass) {
         return entityPage.map(t -> map(entityPage, outClass));
     }
 

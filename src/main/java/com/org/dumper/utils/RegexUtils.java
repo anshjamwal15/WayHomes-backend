@@ -8,8 +8,7 @@ import java.util.regex.Pattern;
 @Data
 public class RegexUtils {
 
-    public static boolean isValidUsername(String name)
-    {
+    public static boolean isValidUsername(String name) {
 
         // Regex to check valid username.
         String regex = "^[A-Za-z, ]++$";

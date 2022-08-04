@@ -1,14 +1,16 @@
 package com.org.dumper.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.Type;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
 @Setter
+@Builder
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class PropertyImages extends BaseModel {
 
     @Id
