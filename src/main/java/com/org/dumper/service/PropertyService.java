@@ -38,7 +38,7 @@ public class PropertyService {
 
     private final ModelMapper mapper;
 
-    private final FileStore fileStore;
+    private final FileService fileService;
 
     private final HelperUtils helperUtils;
 
@@ -79,7 +79,7 @@ public class PropertyService {
             String path = String.format("%s%s", "dumper-storage", UUID.randomUUID());
 
             File convertedFile = helperUtils.multipartFileToFile(file);
-            fileStore.upload(convertedFile);
+            fileService.uploadFile(convertedFile);
 
             PropertyImages images = PropertyImages.builder()
                     .path(path)
@@ -111,7 +111,7 @@ public class PropertyService {
             String path = String.format("%s%s", "dumper-storage", UUID.randomUUID());
 
             File convertedFile = helperUtils.multipartFileToFile(file);
-            fileStore.upload(convertedFile);
+            fileService.uploadFile(convertedFile);
 
             PropertyImages images = PropertyImages.builder()
                     .path(path)
