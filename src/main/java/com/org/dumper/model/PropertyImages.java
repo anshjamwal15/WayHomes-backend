@@ -8,7 +8,6 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Builder
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class PropertyImages extends BaseModel {
@@ -17,17 +16,11 @@ public class PropertyImages extends BaseModel {
     @GeneratedValue
     private Long id;
 
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    private byte[] data;
-
     private String path;
 
     private String contentType;
 
     private String name;
-
-    private Long size;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "property_id")

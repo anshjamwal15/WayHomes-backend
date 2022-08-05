@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth/property")
@@ -20,12 +22,8 @@ public class PropertyController {
     @PostMapping("/create-property")
     public ResponseEntity<String> createProperty(
             @RequestParam MultipartFile[] files, PropertyRequest request
-    ) {
-        try {
-            propertyService.createProperty(files, request);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    ) throws IOException {
+        propertyService.createProperty(files, request);
         return ResponseEntity.ok().body("Property created SuccessFully");
     }
 

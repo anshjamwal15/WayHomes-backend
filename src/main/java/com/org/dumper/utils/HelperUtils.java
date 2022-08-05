@@ -12,8 +12,9 @@ import java.util.Objects;
 public class HelperUtils {
 
     public File multipartFileToFile(MultipartFile file) {
+        System.out.println(file.getOriginalFilename());
         File convertedFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
-        try (FileOutputStream fos = new FileOutputStream(convertedFile)){
+        try (FileOutputStream fos = new FileOutputStream(convertedFile)) {
             fos.write(file.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
