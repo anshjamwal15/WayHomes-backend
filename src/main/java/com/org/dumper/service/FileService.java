@@ -1,7 +1,7 @@
 package com.org.dumper.service;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
@@ -9,27 +9,31 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 @AllArgsConstructor
 @Service
 public class FileService {
 
-    private final AmazonS3Client s3Client;
+    private final AmazonS3 s3Client;
 
-    public void uploadFile(File file) {
-        try (final InputStream stream = new FileInputStream(file)) {
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentLength(file.length());
+    public void uploadFile(MultipartFile file) {
+
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(file.getSize());
+        metadata.setLastModified(new Date());
+        try {
             s3Client.putObject(
-                    new PutObjectRequest("dumper-storage", file.getName(), stream, metadata)
+                    new PutObjectRequest("dumper-storage", file.getName(), file.getInputStream(), metadata)
             );
-        } catch (IOException e) {
-            throw new IllegalStateException("File uploading failed.", e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

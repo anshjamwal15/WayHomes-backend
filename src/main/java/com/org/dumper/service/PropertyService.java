@@ -1,5 +1,6 @@
 package com.org.dumper.service;
 
+import ch.qos.logback.core.util.FileUtil;
 import com.org.dumper.dto.PropertyDto;
 import com.org.dumper.dto.PropertyImagesDto;
 import com.org.dumper.dto.UserDto;
@@ -12,16 +13,21 @@ import com.org.dumper.repository.PropertyRepository;
 import com.org.dumper.repository.UserRepository;
 import com.org.dumper.utils.HelperUtils;
 import lombok.AllArgsConstructor;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 import static org.apache.http.entity.ContentType.*;
@@ -42,7 +48,7 @@ public class PropertyService {
 
     private final HelperUtils helperUtils;
 
-    public String createProperty(MultipartFile[] files, PropertyRequest request) {
+    public String createProperty(MultipartFile[] files, PropertyRequest request) throws IOException {
 
         Property newProperty = new Property();
 
@@ -78,11 +84,13 @@ public class PropertyService {
 
             String path = String.format("%s%s", "dumper-storage", UUID.randomUUID());
 
-            File convertedFile = helperUtils.multipartFileToFile(file);
-            fileService.uploadFile(convertedFile);
+            fileService.uploadFile(file);
 
             PropertyImages images = PropertyImages.builder()
                     .path(path)
+                    .property(newProperty)
+                    .contentType(file.getContentType())
+                    .name(file.getOriginalFilename())
                     .build();
             propertyImagesRepository.save(images);
         }
@@ -110,12 +118,16 @@ public class PropertyService {
 
             String path = String.format("%s%s", "dumper-storage", UUID.randomUUID());
 
-            File convertedFile = helperUtils.multipartFileToFile(file);
-            fileService.uploadFile(convertedFile);
+            fileService.uploadFile(file);
+
+            Property property = propertyRepository.findById(propertyId)
+                    .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
 
             PropertyImages images = PropertyImages.builder()
                     .path(path)
+                    .name(file.getOriginalFilename())
                     .contentType(file.getContentType())
+                    .property(property)
                     .build();
             propertyImagesRepository.save(images);
         }
@@ -154,11 +166,9 @@ public class PropertyService {
             Set<PropertyImagesDto> imagesDtoSet = new HashSet<>();
             for (PropertyImages images : property.getPropertyImages()) {
                 PropertyImagesDto imagesDto = new PropertyImagesDto();
-                imagesDto.setData(images.getData());
                 imagesDto.setName(images.getName());
                 imagesDto.setPath(images.getPath());
                 imagesDto.setContentType(images.getContentType());
-                imagesDto.setSize(images.getSize());
                 imagesDtoSet.add(imagesDto);
             }
             scopeDto.setPropertyImages(imagesDtoSet);
