@@ -1,7 +1,7 @@
 package com.org.dumper.service;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
@@ -19,7 +19,7 @@ import java.io.InputStream;
 @Service
 public class FileService {
 
-    private final AmazonS3Client s3Client;
+    private final AmazonS3 s3Client;
 
     public void uploadFile(File file) {
         try (final InputStream stream = new FileInputStream(file)) {
