@@ -3,6 +3,7 @@ package com.org.dumper.payload.request;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 @Data
 public class PropertyRequest {
@@ -27,5 +28,7 @@ public class PropertyRequest {
 
     @NotBlank
     private Long userId;
+
+    private List<String> imagePath;
 
 }

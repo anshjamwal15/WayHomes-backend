@@ -40,6 +40,4 @@ public class Property extends BaseModel {
     @OneToMany(mappedBy = "property")
     private Set<PropertyImages> propertyImages;
 
-    @ManyToMany
-    private Set<FavProperties> favProperties;
 }

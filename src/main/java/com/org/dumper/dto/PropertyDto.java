@@ -14,8 +14,8 @@ public class PropertyDto {
     public Long price;
     public String description;
     public String address;
+    private Boolean isFav;
     public UserDto user;
-    public Set<UserDto> isFavourite;
     private Long id;
     private Set<PropertyImagesDto> propertyImages;
 }

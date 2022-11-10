@@ -7,9 +7,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -21,24 +19,25 @@ public class PropertyController {
 
     @PostMapping("/create-property")
     public ResponseEntity<String> createProperty(
-            @RequestParam MultipartFile[] files, PropertyRequest request
-    ) throws IOException {
-        propertyService.createProperty(files, request);
+            @RequestBody PropertyRequest request
+    ) throws Exception {
+//        @RequestParam MultipartFile[] files,
+        propertyService.createProperty(request);
         return ResponseEntity.ok().body("Property created SuccessFully");
     }
 
     @PostMapping("/add-image/{propertyId}")
     public ResponseEntity<String> addImage(
-            @RequestParam MultipartFile[] files, @PathVariable Long propertyId
-    ) {
-        propertyService.addPropertyImage(propertyId, files);
+            @RequestBody PropertyRequest request, @PathVariable Long propertyId
+    ) throws Exception {
+        propertyService.addPropertyImage(propertyId, request);
 
         return ResponseEntity.ok("Image added Successfully");
     }
 
     @GetMapping("/all")
-    public Page<PropertyDto> getAllProperty() {
-        return propertyService.getAllProperty();
+    public Page<PropertyDto> getAllProperty(@RequestParam String email) {
+        return propertyService.getAllProperty(email);
     }
 
     @GetMapping(value = "/{propertyId}")

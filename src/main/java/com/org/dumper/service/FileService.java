@@ -29,9 +29,8 @@ public class FileService {
         metadata.setContentLength(file.getSize());
         metadata.setLastModified(new Date());
         try {
-            s3Client.putObject(
-                    new PutObjectRequest("dumper-storage", file.getName(), file.getInputStream(), metadata)
-            );
+            s3Client.putObject("dumper-storage",
+                    file.getName(), file.getInputStream(), metadata);
         } catch (Exception e) {
             e.printStackTrace();
         }
