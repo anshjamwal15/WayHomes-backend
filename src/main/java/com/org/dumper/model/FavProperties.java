@@ -16,9 +16,6 @@ public class FavProperties extends BaseModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @JsonProperty
-    private boolean favorite;
-
     @ManyToOne
     @JoinColumn(name = "property_id")
     private Property property;

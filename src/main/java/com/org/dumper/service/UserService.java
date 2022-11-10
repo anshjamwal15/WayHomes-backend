@@ -27,31 +27,24 @@ public class UserService {
 
     private final FavRepository favRepository;
 
-    public String addFavProperty(Long userId, Long propertyId, boolean isFav) {
+    public void changeOrAddFavProperty(String email, Long propertyId) {
 
         Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new RuntimeException("Property not found with id: " + propertyId));
+                .orElseThrow(() -> new RuntimeException("Property not found with id : " + propertyId));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email : " + email));
 
-        Optional<FavProperties> favProperties = favRepository.findByUsersIdAndPropertyId(userId, propertyId);
+        Optional<FavProperties> favProperties = favRepository.findByUsersIdAndPropertyId(user.getId(), propertyId);
 
         if (favProperties.isPresent()) {
-            favProperties.stream().forEach(prop -> {
-                prop.setFavorite(isFav);
-                favRepository.save(prop);
-            });
+            favRepository.delete(favProperties.get());
         } else {
             FavProperties properties = new FavProperties();
-
-            properties.setFavorite(isFav);
             properties.setProperty(property);
             properties.setUsers(user);
             favRepository.save(properties);
         }
-
-        return "User successfully changed value to : " + isFav;
     }
 
     public List<FavPropertiesDto> getFavProperties(Long userId) {
@@ -75,9 +68,6 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id :" + userId));
 
-//        user.setFirstName(request.getFirstName());
-//        user.setLastName(request.getLastName());
-
         if (RegexUtils.isValidEmail(request.getEmail())) {
             user.setEmail(request.getEmail());
         }
@@ -91,6 +81,13 @@ public class UserService {
         userRepository.save(user);
 
         return ObjectMapperUtils.map(user, UserDto.class);
+    }
 
+    public UserDto getUserByEmail(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email :" + email));
+
+        return ObjectMapperUtils.map(user, UserDto.class);
     }
 }

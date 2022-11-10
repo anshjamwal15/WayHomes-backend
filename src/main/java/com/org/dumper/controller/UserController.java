@@ -18,14 +18,13 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/like-dislike/{userId}/{propertyId}")
+    @PostMapping("/likedislike/{propertyId}")
     public ResponseEntity<String> addFavProperty(
-            @PathVariable Long propertyId, @PathVariable Long userId,
-            @RequestParam boolean isFav
+            @PathVariable Long propertyId, @RequestParam String email
     ) {
-        userService.addFavProperty(userId, propertyId, isFav);
+        userService.changeOrAddFavProperty(email, propertyId);
 
-        return ResponseEntity.ok("User successfully changed value to : " + isFav);
+        return ResponseEntity.ok("User Changed entity Successfully.");
     }
 
     @PostMapping("/update-profile/{userId}")
@@ -51,5 +50,13 @@ public class UserController {
         List<FavPropertiesDto> propertiesList = userService.getFavProperties(userId);
 
         return ResponseEntity.ok(propertiesList);
+    }
+
+    @GetMapping("/getuser")
+    public ResponseEntity<UserDto> getUser(@RequestBody String email) {
+
+        UserDto user = userService.getUserByEmail(email);
+
+        return ResponseEntity.ok(user);
     }
 }

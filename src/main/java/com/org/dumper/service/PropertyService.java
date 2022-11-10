@@ -4,10 +4,12 @@ import ch.qos.logback.core.util.FileUtil;
 import com.org.dumper.dto.PropertyDto;
 import com.org.dumper.dto.PropertyImagesDto;
 import com.org.dumper.dto.UserDto;
+import com.org.dumper.model.FavProperties;
 import com.org.dumper.model.Property;
 import com.org.dumper.model.PropertyImages;
 import com.org.dumper.model.User;
 import com.org.dumper.payload.request.PropertyRequest;
+import com.org.dumper.repository.FavRepository;
 import com.org.dumper.repository.PropertyImagesRepository;
 import com.org.dumper.repository.PropertyRepository;
 import com.org.dumper.repository.UserRepository;
@@ -44,11 +46,9 @@ public class PropertyService {
 
     private final ModelMapper mapper;
 
-    private final FileService fileService;
+    private final FavRepository favRepository;
 
-    private final HelperUtils helperUtils;
-
-    public String createProperty(MultipartFile[] files, PropertyRequest request) throws IOException {
+    public String createProperty(PropertyRequest request) throws Exception {
 
         Property newProperty = new Property();
 
@@ -63,79 +63,107 @@ public class PropertyService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceAccessException("User not found with id: " + request.getUserId()));
 
-        // TODO Check user as buyer or seller
-//        if (user.getRoles() == )
-
         newProperty.setUser(user);
 
         propertyRepository.save(newProperty);
 
-        for (MultipartFile file : files) {
-            if (file.isEmpty()) {
-                throw new IllegalStateException("Cannot upload empty file");
+        for (String image : request.getImagePath()) {
+
+            if (image.isEmpty() && image.isBlank()) {
+                throw new Exception("No path found error");
             }
-
-            if (!Arrays.asList(IMAGE_PNG.getMimeType(),
-                    IMAGE_BMP.getMimeType(),
-                    IMAGE_GIF.getMimeType(),
-                    IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
-                throw new IllegalStateException("File uploaded is not an image");
-            }
-
-            String path = String.format("%s%s", "dumper-storage", UUID.randomUUID());
-
-            fileService.uploadFile(file);
 
             PropertyImages images = PropertyImages.builder()
-                    .path(path)
+                    .path(image)
                     .property(newProperty)
-                    .contentType(file.getContentType())
-                    .name(file.getOriginalFilename())
                     .build();
             propertyImagesRepository.save(images);
+
         }
+
+//        for (MultipartFile file : files) {
+//            if (file.isEmpty()) {
+//                throw new IllegalStateException("Cannot upload empty file");
+//            }
+//
+//            if (!Arrays.asList(IMAGE_PNG.getMimeType(),
+//                    IMAGE_BMP.getMimeType(),
+//                    IMAGE_GIF.getMimeType(),
+//                    IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
+//                throw new IllegalStateException("File uploaded is not an image");
+//            }
+//
+//            String path = String.format("%s%s", "dumper-storage", UUID.randomUUID());
+//
+//            fileService.uploadFile(file);
+//
+//            PropertyImages images = PropertyImages.builder()
+//                    .path(path)
+//                    .property(newProperty)
+//                    .contentType(file.getContentType())
+//                    .name(file.getOriginalFilename())
+//                    .build();
+//            propertyImagesRepository.save(images);
+//        }
 
         return "Property created Successfully";
 
     }
 
-    public String addPropertyImage(Long propertyId, MultipartFile[] request) {
+    public String addPropertyImage(Long propertyId, PropertyRequest request) throws Exception {
 
-        propertyRepository.findById(propertyId)
+        Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
 
-        for (MultipartFile file : request) {
-            if (file.isEmpty()) {
-                throw new IllegalStateException("Cannot upload empty file");
+        for (String image : request.getImagePath()) {
+
+            if (image.isEmpty() && image.isBlank()) {
+                throw new Exception("No path found error");
             }
-
-            if (!Arrays.asList(IMAGE_PNG.getMimeType(),
-                    IMAGE_BMP.getMimeType(),
-                    IMAGE_GIF.getMimeType(),
-                    IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
-                throw new IllegalStateException("File uploaded is not an image");
-            }
-
-            String path = String.format("%s%s", "dumper-storage", UUID.randomUUID());
-
-            fileService.uploadFile(file);
-
-            Property property = propertyRepository.findById(propertyId)
-                    .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
 
             PropertyImages images = PropertyImages.builder()
-                    .path(path)
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
+                    .path(image)
                     .property(property)
                     .build();
             propertyImagesRepository.save(images);
+
         }
+
+//        for (MultipartFile file : request) {
+//            if (file.isEmpty()) {
+//                throw new IllegalStateException("Cannot upload empty file");
+//            }
+//
+//            if (!Arrays.asList(IMAGE_PNG.getMimeType(),
+//                    IMAGE_BMP.getMimeType(),
+//                    IMAGE_GIF.getMimeType(),
+//                    IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
+//                throw new IllegalStateException("File uploaded is not an image");
+//            }
+//
+//            String path = String.format("%s%s", "dumper-storage", UUID.randomUUID());
+//
+//            fileService.uploadFile(file);
+//
+//            Property property = propertyRepository.findById(propertyId)
+//                    .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
+//
+//            PropertyImages images = PropertyImages.builder()
+//                    .path(path)
+//                    .name(file.getOriginalFilename())
+//                    .contentType(file.getContentType())
+//                    .property(property)
+//                    .build();
+//            propertyImagesRepository.save(images);
+//        }
 
         return "Image added Successfully";
     }
 
-    public Page<PropertyDto> getAllProperty() {
+    public Page<PropertyDto> getAllProperty(String email) {
+
+        User existingUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email :" + email));
 
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -155,6 +183,14 @@ public class PropertyService {
             scopeDto.setGarages(property.getGarages());
             scopeDto.setPrice(property.getPrice());
             scopeDto.setSqFeet(property.getSqFeet());
+            scopeDto.setIsFav(false);
+
+            Optional<FavProperties> favProperties =
+                    favRepository.findByUsersIdAndPropertyId(existingUser.getId(), property.getId());
+
+            if(favProperties.isPresent()) {
+                scopeDto.setIsFav(true);
+            }
             // User
             UserDto user = new UserDto();
             user.setEmail(property.getUser().getEmail());
