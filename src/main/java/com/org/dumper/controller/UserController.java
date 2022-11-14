@@ -27,19 +27,19 @@ public class UserController {
         return ResponseEntity.ok("User Changed entity Successfully.");
     }
 
-    @PostMapping("/update-profile/{userId}")
+    @PostMapping("/updateprofile")
     public ResponseEntity<UserDto> updateUserProfile(
-            @RequestBody UserProfileRequest request, @PathVariable Long userId
+            @RequestBody UserProfileRequest request, @RequestParam String email
     ) {
-        UserDto userDto = userService.updateUserProfile(request, userId);
+        UserDto userDto = userService.updateUserProfile(request, email);
 
         return ResponseEntity.ok(userDto);
     }
 
-    @GetMapping("/get-user-info/{userId}")
-    public ResponseEntity<UserDto> getUserProfile(@PathVariable Long userId) {
+    @GetMapping("/getuserinfo")
+    public ResponseEntity<UserDto> getUserProfile(@RequestParam String email) {
 
-        UserDto user = userService.getUserProfile(userId);
+        UserDto user = userService.getUserProfile(email);
 
         return ResponseEntity.ok(user);
     }

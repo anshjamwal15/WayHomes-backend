@@ -55,18 +55,18 @@ public class UserService {
 
     }
 
-    public UserDto getUserProfile(Long userId) {
+    public UserDto getUserProfile(String email) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id :" + userId));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email :" + email));
 
         return ObjectMapperUtils.map(user, UserDto.class);
     }
 
-    public UserDto updateUserProfile(UserProfileRequest request, Long userId) {
+    public UserDto updateUserProfile(UserProfileRequest request, String email) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id :" + userId));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email :" + email));
 
         if (RegexUtils.isValidEmail(request.getEmail())) {
             user.setEmail(request.getEmail());
@@ -74,7 +74,7 @@ public class UserService {
         if (RegexUtils.isValidUsername(request.getUsername())) {
             user.setUsername(request.getUsername());
         }
-        if (!request.getPassword().isBlank()) {
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
             user.setPassword(request.getPassword());
         }
 
