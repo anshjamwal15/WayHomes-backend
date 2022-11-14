@@ -15,24 +15,14 @@ import com.org.dumper.repository.PropertyRepository;
 import com.org.dumper.repository.UserRepository;
 import com.org.dumper.utils.HelperUtils;
 import lombok.AllArgsConstructor;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileSystemUtils;
 import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
-
-import static org.apache.http.entity.ContentType.*;
 
 @Service
 @AllArgsConstructor
