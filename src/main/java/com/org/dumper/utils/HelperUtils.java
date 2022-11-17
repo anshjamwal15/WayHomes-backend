@@ -2,7 +2,6 @@ package com.org.dumper.utils;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -17,5 +16,14 @@ public class HelperUtils {
         fos.write(file.getBytes());
         fos.close();
         return convertedFile;
+    }
+
+    public String generateFileName(MultipartFile multiPart, String path, String id) {
+        if(path.equals("properties")) {
+            return "properties" + "/" + "prop-" + id + "/" + Objects.requireNonNull(
+                    multiPart.getOriginalFilename()).replace(" ", "_");
+        }
+        return "users" + "/" + "user-" + id + "/" + Objects.requireNonNull(
+                multiPart.getOriginalFilename()).replace(" ", "_");
     }
 }

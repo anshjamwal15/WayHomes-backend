@@ -27,9 +27,7 @@ public class FileService {
 
     private final HelperUtils helperUtils;
 
-    public void uploadFile(MultipartFile multipartFile) throws Exception {
-
-        String objectName = generateFileName(multipartFile);
+    public void uploadFile(MultipartFile multipartFile, String objectName) throws Exception {
 
         FileInputStream serviceAccount = new FileInputStream(
                 ResourceUtils.getFile("classpath:dumper-firebase.json"));
@@ -44,12 +42,5 @@ public class FileService {
 
         storage.create(blobInfo, Files.readAllBytes(filePath));
     }
-
-    private String generateFileName(MultipartFile multiPart) {
-        return "images" + "/" + Objects.requireNonNull(
-                multiPart.getOriginalFilename()).replace(" ", "_");
-    }
-
-
 
 }

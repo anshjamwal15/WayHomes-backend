@@ -18,7 +18,7 @@ public class PropertyController {
 
     private final PropertyService propertyService;
 
-    @PostMapping("/create-property")
+    @PostMapping("/createproperty")
     public ResponseEntity<String> createProperty(
             @RequestBody PropertyRequest request
     ) throws Exception {
