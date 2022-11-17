@@ -5,6 +5,9 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+## Custom ignore
+src/main/resource/dumper-firebase.json
+
 ### STS ###
 .apt_generated
 .classpath

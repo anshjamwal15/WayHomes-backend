@@ -1,6 +1,6 @@
 package com.org.dumper.service;
 
-import ch.qos.logback.core.util.FileUtil;
+
 import com.org.dumper.dto.PropertyDto;
 import com.org.dumper.dto.PropertyImagesDto;
 import com.org.dumper.dto.UserDto;
@@ -13,7 +13,6 @@ import com.org.dumper.repository.FavRepository;
 import com.org.dumper.repository.PropertyImagesRepository;
 import com.org.dumper.repository.PropertyRepository;
 import com.org.dumper.repository.UserRepository;
-import com.org.dumper.utils.HelperUtils;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -22,7 +21,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.*;
+
+import static org.apache.http.entity.ContentType.*;
 
 @Service
 @AllArgsConstructor
@@ -34,9 +37,11 @@ public class PropertyService {
 
     private final UserRepository userRepository;
 
-    private final ModelMapper mapper;
+    private final ModelMapper    mapper;
 
     private final FavRepository favRepository;
+
+    private final FileService fileService;
 
     public String createProperty(PropertyRequest request) throws Exception {
 
@@ -57,19 +62,19 @@ public class PropertyService {
 
         propertyRepository.save(newProperty);
 
-        for (String image : request.getImagePath()) {
-
-            if (image.isEmpty() && image.isBlank()) {
-                throw new Exception("No path found error");
-            }
-
-            PropertyImages images = PropertyImages.builder()
-                    .path(image)
-                    .property(newProperty)
-                    .build();
-            propertyImagesRepository.save(images);
-
-        }
+//        for (String image : request.getImagePath()) {
+//
+//            if (image.isEmpty() && image.isBlank()) {
+//                throw new Exception("No path found error");
+//            }
+//
+//            PropertyImages images = PropertyImages.builder()
+//                    .path(image)
+//                    .property(newProperty)
+//                    .build();
+//            propertyImagesRepository.save(images);
+//
+//        }
 
 //        for (MultipartFile file : files) {
 //            if (file.isEmpty()) {
@@ -100,52 +105,39 @@ public class PropertyService {
 
     }
 
-    public String addPropertyImage(Long propertyId, PropertyRequest request) throws Exception {
+    public String addPropertyImage(Long propertyId, MultipartFile[] files) throws Exception {
 
-        Property property = propertyRepository.findById(propertyId)
+        propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
 
-        for (String image : request.getImagePath()) {
 
-            if (image.isEmpty() && image.isBlank()) {
-                throw new Exception("No path found error");
+        for (MultipartFile file : files) {
+            if (file.isEmpty()) {
+                throw new IllegalStateException("Cannot upload empty file");
             }
 
+            if (!Arrays.asList(IMAGE_PNG.getMimeType(),
+                    IMAGE_BMP.getMimeType(),
+                    IMAGE_GIF.getMimeType(),
+                    IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
+                throw new IllegalStateException("File uploaded is not an image");
+            }
+
+            String path = String.format("%s%s", "dumper-storage", UUID.randomUUID());
+
+            fileService.uploadFile(file);
+
+            Property property = propertyRepository.findById(propertyId)
+                    .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
+
             PropertyImages images = PropertyImages.builder()
-                    .path(image)
+                    .path(path)
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
                     .property(property)
                     .build();
             propertyImagesRepository.save(images);
-
         }
-
-//        for (MultipartFile file : request) {
-//            if (file.isEmpty()) {
-//                throw new IllegalStateException("Cannot upload empty file");
-//            }
-//
-//            if (!Arrays.asList(IMAGE_PNG.getMimeType(),
-//                    IMAGE_BMP.getMimeType(),
-//                    IMAGE_GIF.getMimeType(),
-//                    IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
-//                throw new IllegalStateException("File uploaded is not an image");
-//            }
-//
-//            String path = String.format("%s%s", "dumper-storage", UUID.randomUUID());
-//
-//            fileService.uploadFile(file);
-//
-//            Property property = propertyRepository.findById(propertyId)
-//                    .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
-//
-//            PropertyImages images = PropertyImages.builder()
-//                    .path(path)
-//                    .name(file.getOriginalFilename())
-//                    .contentType(file.getContentType())
-//                    .property(property)
-//                    .build();
-//            propertyImagesRepository.save(images);
-//        }
 
         return "Image added Successfully";
     }

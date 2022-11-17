@@ -1,6 +1,7 @@
 package com.org.dumper.payload.request;
 
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
 import java.util.List;
@@ -29,6 +30,6 @@ public class PropertyRequest {
     @NotBlank
     private Long userId;
 
-    private List<String> imagePath;
+    private List<MultipartFile> files;
 
 }

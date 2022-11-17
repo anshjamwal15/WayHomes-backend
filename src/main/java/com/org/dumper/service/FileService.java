@@ -1,48 +1,55 @@
 package com.org.dumper.service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.amazonaws.util.IOUtils;
+
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
+import com.org.dumper.utils.HelperUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
+import java.util.Objects;
+
+import static com.org.dumper.config.FirebaseConstants.*;
 
 @AllArgsConstructor
 @Service
 public class FileService {
 
-    private final AmazonS3 s3Client;
+    private final HelperUtils helperUtils;
 
-    public void uploadFile(MultipartFile file) {
+    public void uploadFile(MultipartFile multipartFile) throws Exception {
 
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(file.getSize());
-        metadata.setLastModified(new Date());
-        try {
-            s3Client.putObject("dumper-storage",
-                    file.getName(), file.getInputStream(), metadata);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String objectName = generateFileName(multipartFile);
+
+        FileInputStream serviceAccount = new FileInputStream(
+                ResourceUtils.getFile("classpath:dumper-firebase.json"));
+        File file = helperUtils.multipartFileToFile(multipartFile);
+        Path filePath = file.toPath();
+
+        Storage storage = StorageOptions.newBuilder()
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .setProjectId(FIREBASE_PROJECT_ID).build().getService();
+        BlobId blobId = BlobId.of(FIREBASE_BUCKET, objectName);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(multipartFile.getContentType()).build();
+
+        storage.create(blobInfo, Files.readAllBytes(filePath));
     }
 
-    public byte[] download(String path, String key) {
-        try {
-            S3Object object = s3Client.getObject(path, key);
-            S3ObjectInputStream objectContent = object.getObjectContent();
-            return IOUtils.toByteArray(objectContent);
-        } catch (AmazonServiceException | IOException e) {
-            throw new IllegalStateException("Failed to download the file", e);
-        }
+    private String generateFileName(MultipartFile multiPart) {
+        return "images" + "/" + Objects.requireNonNull(
+                multiPart.getOriginalFilename()).replace(" ", "_");
     }
+
+
+
 }
