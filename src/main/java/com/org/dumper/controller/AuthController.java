@@ -14,14 +14,17 @@ import com.org.dumper.security.service.UserDetailsImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.RememberMeAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -54,10 +57,19 @@ public class AuthController {
         String jwt = jwtUtils.generateJwtToken(authentication);
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        List<String> roles;
 
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
+        if (request.getType() != null &&request.getType().equals("standard")) {
+            roles = userDetails.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+        } else {
+            Set<GrantedAuthority> authorities = new HashSet<>();
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+            roles = authorities.stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+        }
 
         return ResponseEntity.ok(new JwtResponse(jwt,
                 userDetails.getId(),
@@ -79,7 +91,12 @@ public class AuthController {
 
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
-        user.setPassword(encoder.encode(request.getPassword()));
+        user.setType(request.getType());
+        if(request.getType().equals("standard")) {
+            user.setPassword(encoder.encode(request.getPassword()));
+        } else {
+            user.setPassword(encoder.encode("no-password"));
+        }
 
         Set<String> strRoles = request.getRole();
         Set<Role> roles = new HashSet<>();

@@ -12,6 +12,7 @@ import com.org.dumper.repository.UserRepository;
 import com.org.dumper.utils.ObjectMapperUtils;
 import com.org.dumper.utils.RegexUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +27,8 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final FavRepository favRepository;
+
+    private final PasswordEncoder encoder;
 
     public void changeOrAddFavProperty(String email, Long propertyId) {
 
@@ -75,7 +78,7 @@ public class UserService {
             user.setUsername(request.getUsername());
         }
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            user.setPassword(request.getPassword());
+            user.setPassword(encoder.encode(request.getPassword()));
         }
 
         userRepository.save(user);
