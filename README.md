@@ -7,4 +7,4 @@ An Realestate application that does not use/share your data.
 ![](https://github.com/aimbot1526/dumper-backend/blob/develop/src/main/resources/WayHomes.jpg)
 
 # :construction_worker: Database
-![](https://github.com/aimbot1526/dumper-backend/blob/develop/src/main/resources/WayHomes.jpg)
+![](https://github.com/aimbot1526/dumper-backend/blob/develop/src/main/resources/WayHomes-db.jpg)
