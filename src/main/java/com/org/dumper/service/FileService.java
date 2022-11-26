@@ -41,6 +41,7 @@ public class FileService {
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(multipartFile.getContentType()).build();
 
         storage.create(blobInfo, Files.readAllBytes(filePath));
+        Files.deleteIfExists(Path.of(Objects.requireNonNull(multipartFile.getOriginalFilename())));
     }
 
 }

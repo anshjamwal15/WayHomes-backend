@@ -3,16 +3,11 @@ package com.org.dumper.service;
 
 import com.org.dumper.dto.PropertyDto;
 import com.org.dumper.dto.PropertyImagesDto;
+import com.org.dumper.dto.TagDto;
 import com.org.dumper.dto.UserDto;
-import com.org.dumper.model.FavProperties;
-import com.org.dumper.model.Property;
-import com.org.dumper.model.PropertyImages;
-import com.org.dumper.model.User;
+import com.org.dumper.model.*;
 import com.org.dumper.payload.request.PropertyRequest;
-import com.org.dumper.repository.FavRepository;
-import com.org.dumper.repository.PropertyImagesRepository;
-import com.org.dumper.repository.PropertyRepository;
-import com.org.dumper.repository.UserRepository;
+import com.org.dumper.repository.*;
 import com.org.dumper.utils.HelperUtils;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -24,7 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.http.entity.ContentType.*;
 
@@ -38,7 +35,7 @@ public class PropertyService {
 
     private final UserRepository userRepository;
 
-    private final ModelMapper    mapper;
+    private final ModelMapper mapper;
 
     private final FavRepository favRepository;
 
@@ -46,7 +43,9 @@ public class PropertyService {
 
     private final HelperUtils helperUtils;
 
-    public String createProperty(PropertyRequest request) throws Exception {
+    private final TagRepository tagRepository;
+
+    public void createProperty(PropertyRequest request) throws Exception {
 
         Property newProperty = new Property();
 
@@ -63,8 +62,18 @@ public class PropertyService {
 
         newProperty.setUser(user);
 
-        propertyRepository.save(newProperty);
+        Set<Tag> tags = new HashSet<>();
 
+        for(String sentTag : request.getTags()) {
+            Tag tag = new Tag();
+            tag.setName(sentTag);
+            tagRepository.save(tag);
+            tags.add(tag);
+        }
+
+        newProperty.setPropertyTags(tags);
+
+        propertyRepository.save(newProperty);
 
         for (MultipartFile file : request.getFiles()) {
             if (file.isEmpty()) {
@@ -85,7 +94,7 @@ public class PropertyService {
             String fileName = Objects.requireNonNull(file.getOriginalFilename()).replace(" ", "_");
 
             String path = "https://firebasestorage.googleapis.com/v0/b/" +
-                    "dumper-a11b4.appspot.com/o/properties%2Fprop-"+newProperty.getId()+"%2F"+fileName+"?alt=media";
+                    "dumper-a11b4.appspot.com/o/properties%2Fprop-" + newProperty.getId() + "%2F" + fileName + "?alt=media";
 
             PropertyImages images = PropertyImages.builder()
                     .path(path)
@@ -96,11 +105,9 @@ public class PropertyService {
             propertyImagesRepository.save(images);
         }
 
-        return "Property created Successfully";
-
     }
 
-    public String addPropertyImage(Long propertyId, MultipartFile[] files) throws Exception {
+    public void addPropertyImage(Long propertyId, MultipartFile[] files) throws Exception {
 
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
@@ -125,7 +132,7 @@ public class PropertyService {
             String fileName = Objects.requireNonNull(file.getOriginalFilename()).replace(" ", "_");
 
             String path = "https://firebasestorage.googleapis.com/v0/b/" +
-                    "dumper-a11b4.appspot.com/o/properties%2Fprop-"+propertyId+"%2F"+fileName+"?alt=media";
+                    "dumper-a11b4.appspot.com/o/properties%2Fprop-" + propertyId + "%2F" + fileName + "?alt=media";
 
             PropertyImages images = PropertyImages.builder()
                     .path(path)
@@ -136,63 +143,38 @@ public class PropertyService {
             propertyImagesRepository.save(images);
         }
 
-        return "Image added Successfully";
     }
 
-    public Page<PropertyDto> getAllProperty(String email) {
+    public Page<PropertyDto> getAllProperty(String email, @Nullable String tag) {
 
         User existingUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email :" + email));
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        Page<Property> properties = propertyRepository.findAll(pageable);
-
-        List<PropertyDto> propertyDtoList = new ArrayList<>();
-
-        for (Property property : properties) {
-
-            PropertyDto scopeDto = new PropertyDto();
-            // Property info
-            scopeDto.setId(property.getId());
-            scopeDto.setAddress(property.getAddress());
-            scopeDto.setBathrooms(property.getBathrooms());
-            scopeDto.setBedrooms(property.getBedrooms());
-            scopeDto.setDescription(property.getDescription());
-            scopeDto.setGarages(property.getGarages());
-            scopeDto.setPrice(property.getPrice());
-            scopeDto.setSqFeet(property.getSqFeet());
-            scopeDto.setIsFav(false);
-
-            Optional<FavProperties> favProperties =
-                    favRepository.findByUsersIdAndPropertyId(existingUser.getId(), property.getId());
-
-            if(favProperties.isPresent()) {
-                scopeDto.setIsFav(true);
-            }
-            // User
-            UserDto user = new UserDto();
-            user.setEmail(property.getUser().getEmail());
-            user.setFirstName(property.getUser().getFirstName());
-            user.setLastName(property.getUser().getLastName());
-            user.setUsername(property.getUser().getUsername());
-            scopeDto.setUser(user);
-            // Property images
-            Set<PropertyImagesDto> imagesDtoSet = new HashSet<>();
-            for (PropertyImages images : property.getPropertyImages()) {
-                PropertyImagesDto imagesDto = new PropertyImagesDto();
-                imagesDto.setName(images.getName());
-                imagesDto.setPath(images.getPath());
-                imagesDto.setContentType(images.getContentType());
-                imagesDtoSet.add(imagesDto);
-            }
-            scopeDto.setPropertyImages(imagesDtoSet);
-            propertyDtoList.add(scopeDto);
+        Set<PropertyDto> propertyDtoList;
+        Tag optionalTag;
+        List<Property> optionalList = new ArrayList<>();
+        try {
+            optionalTag = tagRepository.findByName(tag)
+                    .orElseThrow(() -> new ResourceAccessException("There is no : " + tag));
+            optionalList = new ArrayList<>(optionalTag.getProperties());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        final int start = (int) pageable.getOffset();
-        final int end = Math.min((start + pageable.getPageSize()), propertyDtoList.size());
+        Set<PropertyDto> propertySet = propertyToDtoList(optionalList, existingUser);
+        Set<PropertyDto> finalSet = new HashSet<>();
+        if(propertySet.isEmpty()) {
+            List<Property> properties = propertyRepository.findAll();
+            propertyDtoList = propertyToDtoList(properties, existingUser);
+            finalSet.addAll(propertyDtoList);
+        }
+        finalSet.addAll(propertySet);
 
-        return new PageImpl<>(propertyDtoList.subList(start, end), pageable, propertyDtoList.size());
+        final int start = (int) pageable.getOffset();
+        final int end = Math.min((start + pageable.getPageSize()), finalSet.size());
+
+        return new PageImpl<>((new LinkedList<>(finalSet)).subList(start, end), pageable, finalSet.size());
     }
 
     public PropertyDto getPropertyById(Long propertyId) {
@@ -220,5 +202,60 @@ public class PropertyService {
         return "Property successfully deleted with id: " + propertyId;
     }
 
+    // Property To Dto
+    private Set<PropertyDto> propertyToDtoList(List<Property> properties, User existingUser) {
+        Set<PropertyDto> propertyDtoList = new HashSet<>();
 
+        for (Property property : properties) {
+
+            PropertyDto scopeDto = new PropertyDto();
+            // Property info
+            scopeDto.setId(property.getId());
+            scopeDto.setAddress(property.getAddress());
+            scopeDto.setBathrooms(property.getBathrooms());
+            scopeDto.setBedrooms(property.getBedrooms());
+            scopeDto.setDescription(property.getDescription());
+            scopeDto.setGarages(property.getGarages());
+            scopeDto.setPrice(property.getPrice());
+            scopeDto.setSqFeet(property.getSqFeet());
+            scopeDto.setIsFav(false);
+
+            Optional<FavProperties> favProperties =
+                    favRepository.findByUsersIdAndPropertyId(existingUser.getId(), property.getId());
+
+            if (favProperties.isPresent()) {
+                scopeDto.setIsFav(true);
+            }
+            // User
+            UserDto user = new UserDto();
+            user.setEmail(property.getUser().getEmail());
+            user.setFirstName(property.getUser().getFirstName());
+            user.setLastName(property.getUser().getLastName());
+            user.setUsername(property.getUser().getUsername());
+            scopeDto.setUser(user);
+            // Property images
+            Set<PropertyImagesDto> imagesDtoSet = new HashSet<>();
+            for (PropertyImages images : property.getPropertyImages()) {
+                PropertyImagesDto imagesDto = new PropertyImagesDto();
+                imagesDto.setName(images.getName());
+                imagesDto.setPath(images.getPath());
+                imagesDto.setContentType(images.getContentType());
+                imagesDtoSet.add(imagesDto);
+            }
+            scopeDto.setPropertyImages(imagesDtoSet);
+            propertyDtoList.add(scopeDto);
+        }
+        return propertyDtoList;
+    }
+
+    public List<TagDto> getAllTags() {
+        List<Tag> tagList = tagRepository.findAll();
+        List<TagDto> tagDtoList = new ArrayList<>();
+        for(Tag tag : tagList) {
+            TagDto newDto = new TagDto();
+            newDto.setName(tag.getName());
+            tagDtoList.add(newDto);
+        }
+        return tagDtoList;
+    }
 }
