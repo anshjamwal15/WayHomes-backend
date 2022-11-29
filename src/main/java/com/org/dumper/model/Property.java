@@ -40,4 +40,10 @@ public class Property extends BaseModel {
     @OneToMany(mappedBy = "property")
     private Set<PropertyImages> propertyImages;
 
+    @ManyToMany
+    @JoinTable(
+            name = "property_tags",
+            joinColumns = @JoinColumn(name = "property_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private Set<Tag> propertyTags;
 }

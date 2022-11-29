@@ -20,23 +20,20 @@ repositories {
 }
 
 dependencies {
-	// aws
-	implementation 'com.amazonaws:aws-java-sdk:1.12.275'
-	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.275'
-	//
+
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-validation:2.6.2'
-	implementation 'org.springframework:spring-websocket:5.3.18'
-	implementation 'org.modelmapper:modelmapper:3.1.0'
-	implementation 'org.springframework:spring-messaging:5.3.18'
+
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.mapstruct:mapstruct:1.4.2.Final'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
-	compileOnly 'org.projectlombok:lombok'
+	implementation 'org.modelmapper:modelmapper:3.1.0'
 	runtimeOnly 'org.postgresql:postgresql'
+	//firebase
+	implementation 'com.google.firebase:firebase-admin:9.1.1'
+	//firebase
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'

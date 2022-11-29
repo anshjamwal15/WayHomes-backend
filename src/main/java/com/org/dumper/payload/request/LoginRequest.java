@@ -12,4 +12,6 @@ public class LoginRequest {
 
     @NotBlank
     public String password;
+
+    public String type;
 }
