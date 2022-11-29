@@ -24,7 +24,7 @@ public class PropertyController {
 
     @PostMapping("/createproperty")
     public ResponseEntity<String> createProperty(
-            @ModelAttribute PropertyRequest request
+        @ModelAttribute PropertyRequest request
     ) throws Exception {
         propertyService.createProperty(request);
         return ResponseEntity.ok().body("Property created SuccessFully");
@@ -32,7 +32,7 @@ public class PropertyController {
 
     @PostMapping("/addimage/{propertyId}")
     public ResponseEntity<String> addImage(
-            @RequestParam MultipartFile[] files, @PathVariable Long propertyId
+        @RequestParam MultipartFile[] files, @PathVariable Long propertyId
     ) throws Exception {
         propertyService.addPropertyImage(propertyId, files);
 

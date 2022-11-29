@@ -39,3 +39,4 @@ out/
 
 ## Custom ignore
 /src/main/resources/dumper-firebase.json
+.fleet
