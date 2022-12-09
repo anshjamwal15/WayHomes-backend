@@ -44,7 +44,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/liked-properties/{userId}")
+    @GetMapping("/likedproperties/{userId}")
     public ResponseEntity<List<FavPropertiesDto>> getFavProperties(@PathVariable Long userId) {
 
         List<FavPropertiesDto> propertiesList = userService.getFavProperties(userId);
