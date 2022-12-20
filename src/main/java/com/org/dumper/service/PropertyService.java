@@ -1,6 +1,5 @@
 package com.org.dumper.service;
 
-
 import com.org.dumper.dto.PropertyDto;
 import com.org.dumper.dto.PropertyImagesDto;
 import com.org.dumper.dto.TagDto;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 import static org.apache.http.entity.ContentType.*;
@@ -57,22 +55,22 @@ public class PropertyService {
         newProperty.setAddress(request.getAddress());
 
         User user = userRepository.findById(request.getUserId())
-            .orElseThrow(() -> new ResourceAccessException("User not found with id: " + request.getUserId()));
+                .orElseThrow(() -> new ResourceAccessException("User not found with id: " + request.getUserId()));
 
         newProperty.setUser(user);
 
-        Set<Tag> tags = new HashSet<>();
+        if (!request.getTags().isEmpty()) {
+            Set<Tag> tags = new HashSet<>();
 
-        for (String sentTag : request.getTags()) {
-            Tag tag = new Tag();
-            tag.setName(sentTag);
-            tagRepository.save(tag);
-            tags.add(tag);
+            for (String sentTag : request.getTags()) {
+                Tag tag = new Tag();
+                tag.setName(sentTag);
+                tagRepository.save(tag);
+                tags.add(tag);
+            }
+            newProperty.setPropertyTags(tags);
+
         }
-
-        newProperty.setPropertyTags(tags);
-
-        propertyRepository.save(newProperty);
 
         for (MultipartFile file : request.getFiles()) {
             if (file.isEmpty()) {
@@ -80,9 +78,9 @@ public class PropertyService {
             }
 
             if (!Arrays.asList(IMAGE_PNG.getMimeType(),
-                IMAGE_BMP.getMimeType(),
-                IMAGE_GIF.getMimeType(),
-                IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
+                    IMAGE_BMP.getMimeType(),
+                    IMAGE_GIF.getMimeType(),
+                    IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
                 throw new IllegalStateException("File uploaded is not an image");
             }
 
@@ -93,24 +91,24 @@ public class PropertyService {
             String fileName = Objects.requireNonNull(file.getOriginalFilename()).replace(" ", "_");
 
             String path = "https://firebasestorage.googleapis.com/v0/b/" +
-                "dumper-a11b4.appspot.com/o/properties%2Fprop-" + newProperty.getId() + "%2F" + fileName + "?alt=media";
+                    "dumper-a11b4.appspot.com/o/properties%2Fprop-" + newProperty.getId() + "%2F" + fileName
+                    + "?alt=media";
 
             PropertyImages images = PropertyImages.builder()
-                .path(path)
-                .name(file.getOriginalFilename())
-                .contentType(file.getContentType())
-                .property(newProperty)
-                .build();
+                    .path(path)
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .property(newProperty)
+                    .build();
             propertyImagesRepository.save(images);
         }
-
+        propertyRepository.save(newProperty);
     }
 
     public void addPropertyImage(Long propertyId, MultipartFile[] files) throws Exception {
 
         Property property = propertyRepository.findById(propertyId)
-            .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
-
+                .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
 
         for (MultipartFile file : files) {
             if (file.isEmpty()) {
@@ -118,9 +116,9 @@ public class PropertyService {
             }
 
             if (!Arrays.asList(IMAGE_PNG.getMimeType(),
-                IMAGE_BMP.getMimeType(),
-                IMAGE_GIF.getMimeType(),
-                IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
+                    IMAGE_BMP.getMimeType(),
+                    IMAGE_GIF.getMimeType(),
+                    IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
                 throw new IllegalStateException("File uploaded is not an image");
             }
 
@@ -131,14 +129,14 @@ public class PropertyService {
             String fileName = Objects.requireNonNull(file.getOriginalFilename()).replace(" ", "_");
 
             String path = "https://firebasestorage.googleapis.com/v0/b/" +
-                "dumper-a11b4.appspot.com/o/properties%2Fprop-" + propertyId + "%2F" + fileName + "?alt=media";
+                    "dumper-a11b4.appspot.com/o/properties%2Fprop-" + propertyId + "%2F" + fileName + "?alt=media";
 
             PropertyImages images = PropertyImages.builder()
-                .path(path)
-                .name(file.getOriginalFilename())
-                .contentType(file.getContentType())
-                .property(property)
-                .build();
+                    .path(path)
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .property(property)
+                    .build();
             propertyImagesRepository.save(images);
         }
 
@@ -147,7 +145,7 @@ public class PropertyService {
     public Page<PropertyDto> getAllProperty(String email, String tag) {
 
         User existingUser = userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("User not found with email :" + email));
+                .orElseThrow(() -> new RuntimeException("User not found with email :" + email));
 
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -158,7 +156,7 @@ public class PropertyService {
         if (!tag.equals("All")) {
             try {
                 optionalTag = tagRepository.findByName(tag)
-                    .orElseThrow(() -> new ResourceAccessException("There is no : " + tag));
+                        .orElseThrow(() -> new ResourceAccessException("There is no : " + tag));
                 optionalList = new ArrayList<>(optionalTag.getProperties());
             } catch (Exception e) {
                 e.getSuppressed();
@@ -183,7 +181,7 @@ public class PropertyService {
     public PropertyDto getPropertyById(Long propertyId) {
 
         Property property = propertyRepository.findById(propertyId)
-            .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
+                .orElseThrow(() -> new RuntimeException("Property not found with id :" + propertyId));
 
         return mapper.map(property, PropertyDto.class);
 
@@ -223,8 +221,8 @@ public class PropertyService {
             scopeDto.setSqFeet(property.getSqFeet());
             scopeDto.setIsFav(false);
 
-            Optional<FavProperties> favProperties =
-                favRepository.findByUsersIdAndPropertyId(existingUser.getId(), property.getId());
+            Optional<FavProperties> favProperties = favRepository.findByUsersIdAndPropertyId(existingUser.getId(),
+                    property.getId());
 
             if (favProperties.isPresent()) {
                 scopeDto.setIsFav(true);

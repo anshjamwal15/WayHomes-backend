@@ -6,6 +6,7 @@ import com.org.dumper.payload.request.PropertyRequest;
 import com.org.dumper.service.PropertyService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,11 +22,12 @@ public class PropertyController {
 
     private final PropertyService propertyService;
 
-    @PostMapping("/createproperty")
+    @PostMapping(path = "/createproperty", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<String> createProperty(
         @ModelAttribute PropertyRequest request
     ) throws Exception {
-        propertyService.createProperty(request);
+        System.out.println(request.getFiles().get(0).getContentType());
+        // propertyService.createProperty(request);
         return ResponseEntity.ok().body("Property created SuccessFully");
     }
 
