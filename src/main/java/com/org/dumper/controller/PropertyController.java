@@ -26,8 +26,7 @@ public class PropertyController {
     public ResponseEntity<String> createProperty(
         @ModelAttribute PropertyRequest request
     ) throws Exception {
-        System.out.println(request.getFiles().get(0).getContentType());
-        // propertyService.createProperty(request);
+        propertyService.createProperty(request);
         return ResponseEntity.ok().body("Property created SuccessFully");
     }
 

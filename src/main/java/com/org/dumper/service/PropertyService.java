@@ -72,6 +72,8 @@ public class PropertyService {
 
         }
 
+        propertyRepository.save(newProperty);
+
         for (MultipartFile file : request.getFiles()) {
             if (file.isEmpty()) {
                 throw new IllegalStateException("Cannot upload empty file");
@@ -80,6 +82,7 @@ public class PropertyService {
             if (!Arrays.asList(IMAGE_PNG.getMimeType(),
                     IMAGE_BMP.getMimeType(),
                     IMAGE_GIF.getMimeType(),
+                    APPLICATION_OCTET_STREAM.getMimeType(),
                     IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
                 throw new IllegalStateException("File uploaded is not an image");
             }
@@ -102,7 +105,6 @@ public class PropertyService {
                     .build();
             propertyImagesRepository.save(images);
         }
-        propertyRepository.save(newProperty);
     }
 
     public void addPropertyImage(Long propertyId, MultipartFile[] files) throws Exception {
@@ -118,6 +120,7 @@ public class PropertyService {
             if (!Arrays.asList(IMAGE_PNG.getMimeType(),
                     IMAGE_BMP.getMimeType(),
                     IMAGE_GIF.getMimeType(),
+                    APPLICATION_OCTET_STREAM.getMimeType(),
                     IMAGE_JPEG.getMimeType()).contains(file.getContentType())) {
                 throw new IllegalStateException("File uploaded is not an image");
             }
