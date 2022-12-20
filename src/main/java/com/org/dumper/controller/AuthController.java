@@ -7,6 +7,7 @@ import com.org.dumper.payload.request.LoginRequest;
 import com.org.dumper.payload.request.SignupRequest;
 import com.org.dumper.payload.response.JwtResponse;
 import com.org.dumper.payload.response.MessageResponse;
+import com.org.dumper.payload.response.UserResponse;
 import com.org.dumper.repository.RoleRepository;
 import com.org.dumper.repository.UserRepository;
 import com.org.dumper.security.jwt.JwtUtils;
@@ -129,6 +130,10 @@ public class AuthController {
         user.setRoles(roles);
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully"));
+        return ResponseEntity.ok(new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                roles.stream().iterator().next().getName().name()));
     }
 }

@@ -33,10 +33,10 @@ public class UserService {
     public void changeOrAddFavProperty(String email, Long propertyId) {
 
         Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new RuntimeException("Property not found with id : " + propertyId));
+            .orElseThrow(() -> new RuntimeException("Property not found with id : " + propertyId));
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email : " + email));
+            .orElseThrow(() -> new RuntimeException("User not found with email : " + email));
 
         Optional<FavProperties> favProperties = favRepository.findByUsersIdAndPropertyId(user.getId(), propertyId);
 
@@ -50,9 +50,12 @@ public class UserService {
         }
     }
 
-    public List<FavPropertiesDto> getFavProperties(Long userId) {
+    public List<FavPropertiesDto> getFavProperties(String email) {
 
-        List<FavProperties> propertiesList = favRepository.findAllByUsersId(userId);
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found with email :" + email));
+
+        List<FavProperties> propertiesList = favRepository.findAllByUsersId(user.getId());
 
         return ObjectMapperUtils.mapAll(propertiesList, FavPropertiesDto.class);
 
@@ -61,7 +64,7 @@ public class UserService {
     public UserDto getUserProfile(String email) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email :" + email));
+            .orElseThrow(() -> new RuntimeException("User not found with email :" + email));
 
         return ObjectMapperUtils.map(user, UserDto.class);
     }
@@ -69,7 +72,7 @@ public class UserService {
     public UserDto updateUserProfile(UserProfileRequest request, String email) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email :" + email));
+            .orElseThrow(() -> new RuntimeException("User not found with email :" + email));
 
         if (RegexUtils.isValidEmail(request.getEmail())) {
             user.setEmail(request.getEmail());
@@ -89,7 +92,7 @@ public class UserService {
     public UserDto getUserByEmail(String email) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email :" + email));
+            .orElseThrow(() -> new RuntimeException("User not found with email :" + email));
 
         return ObjectMapperUtils.map(user, UserDto.class);
     }
