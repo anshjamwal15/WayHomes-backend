@@ -63,10 +63,19 @@ public class PropertyService {
             Set<Tag> tags = new HashSet<>();
 
             for (String sentTag : request.getTags()) {
-                Tag tag = new Tag();
-                tag.setName(sentTag);
-                tagRepository.save(tag);
-                tags.add(tag);
+                try {
+                    Tag searchTag = tagRepository.findByName(sentTag)
+                            .orElseThrow(() -> new ResourceAccessException(
+                                    "User not found with id: " + request.getUserId()));
+                    if (searchTag == null) {
+                        Tag tag = new Tag();
+                        tag.setName(sentTag);
+                        tagRepository.save(tag);
+                        tags.add(tag);
+                    }
+                } catch (Exception e) {
+                    e.getSuppressed();
+                }
             }
             newProperty.setPropertyTags(tags);
 
